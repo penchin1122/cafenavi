@@ -13,24 +13,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#FFFDF9; --page:#F5EFE6; --surface:#FFFDF9; --muted:#EFE6DA;
+  --bg:#FFFDF9; --page:#F1E8DC; --surface:#FFFDF9; --muted:#EFE6DA;
   --line:#E3D8CA; --line-strong:#A89684; --text:#2E2622; --text-sub:#6E6157;
   --primary:#6B4A2F; --primary-hover:#553920; --primary-weak:#F2E7DA; --primary-line:#CDB59C;
   --success:#4E6A3B; --success-weak:#EAF0E2; --warn:#8C5623; --warn-weak:#F6EAD8;
   --on-primary:#FFFDF9; --focus:#E8B04B; --mark:#F1DDB8;
   --shadow:0 1px 2px rgba(46,38,34,.04);
+  color-scheme:light;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#1D1815; --page:#171310; --surface:#231D19; --muted:#2D2520;
-    --line:#3A302A; --line-strong:#7C6B5E; --text:#EFE6DC; --text-sub:#BDAE9F;
-    --primary:#D8B28A; --primary-hover:#E8CBA9; --primary-weak:#3A2C21; --primary-line:#6E5238;
-    --success:#A7C38E; --success-weak:#26301F; --warn:#E3B27A; --warn-weak:#3A2C1C;
-    --on-primary:#1D1815; --mark:#4A3A22; --shadow:none;
-  }
 }
 :root[data-theme="dark"]{
   --bg:#1D1815; --page:#171310; --surface:#231D19; --muted:#2D2520;
@@ -63,7 +55,7 @@ button,input,select{font:inherit;color:inherit}
 .demo-flag{font-size:11px;color:var(--text-sub);border:1px solid var(--line-strong);border-radius:999px;padding:1px 10px;white-space:nowrap;letter-spacing:.1em}
 
 /* layout */
-.layout{max-width:1120px;margin:0 auto;padding:24px 20px 56px;display:grid;gap:24px}
+.layout{max-width:1120px;margin:0 auto;padding:24px 20px 32px;display:grid;gap:24px}
 @media (min-width:960px){
   .layout{grid-template-columns:400px 1fr;align-items:start;gap:32px}
   .search-panel{position:sticky;top:calc(16px + env(safe-area-inset-top,0px))}
@@ -238,7 +230,8 @@ details.more p{font-size:13px;color:var(--text-sub);margin:8px 0}
 .sub-head{font-size:16px;margin:24px 0 10px}
 
 /* update */
-.update{grid-column:1/-1;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:grid;gap:16px}
+.update-wrap{max-width:1120px;margin:0 auto;padding:0 20px 56px}
+.update{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:grid;gap:16px}
 @media (min-width:760px){.update{grid-template-columns:260px 1fr}}
 .update h2{font-size:17px;margin:0 0 8px}
 .update-meta{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px;margin:0}
@@ -258,6 +251,8 @@ summary{cursor:pointer;font-weight:700;color:var(--primary);font-size:14px}
 .log .k-mod{background:var(--primary-weak);color:var(--primary)}
 .log .k-hold{background:var(--warn-weak);color:var(--warn)}
 .site-footer{border-top:1px solid var(--line);background:var(--bg);font-size:12px;color:var(--text-sub)}
+.site-footer a{color:var(--primary);text-underline-offset:3px}
+.site-footer a:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:2px}
 .site-footer .inner{max-width:1120px;margin:0 auto;padding:16px 20px 28px;line-height:1.8}
 @media (max-width:420px){
   .purpose-grid .opt span{font-size:13px;padding:8px 10px;gap:6px;letter-spacing:0}
@@ -387,6 +382,10 @@ summary{cursor:pointer;font-weight:700;color:var(--primary);font-size:14px}
     <div id="results" aria-live="polite"></div>
   </section>
 
+
+</div>
+
+<div class="update-wrap">
   <section class="update" aria-labelledby="updTitle">
     <div>
       <h2 id="updTitle">掲載データの更新</h2>
