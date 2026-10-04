@@ -6,13 +6,13 @@
 
 - `index.html` … サイト本体（店舗データも中に含まれています）
 - `terms.html` … 利用規約・免責事項
-- `data/cafes.json` … 店舗データ（ODbL。フッターからダウンロードできるようにしています）
+- `cafes.json` … 店舗データ（ODbL。フッターからダウンロードできるようにしています）
 - `.nojekyll` … GitHub Pages の変換処理を止めるための空ファイル
 
 ## GitHub Pages での公開手順
 
 1. GitHub で新しいリポジトリを作る（名前の例：`cafenavi`、公開設定は Public）
-2. リポジトリの「Add file」→「Upload files」から、このフォルダの中身をすべてアップロードする（`data` フォルダごと）
+2. リポジトリの「Add file」→「Upload files」から、このフォルダの中身をすべてアップロードする
 3. 「Settings」→「Pages」を開き、「Branch」を `main`、フォルダを `/ (root)` にして保存する
 4. 数分待つと `https://ユーザー名.github.io/cafenavi/` で公開される
 
