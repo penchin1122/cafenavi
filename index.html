@@ -424,8 +424,8 @@ summary{cursor:pointer;font-weight:700;color:var(--primary);font-size:14px}
       </div>
       <label class="sort" id="sortWrap" hidden>並び順
         <select id="sortSel">
+          <option value="here" selected>現在地から近い順</option>
           <option value="walk">駅から近い順</option>
-          <option value="here">現在地から近い順</option>
           <option value="price">価格が安い順</option>
           <option value="feat">設備が充実している順</option>
           <option value="late">遅くまで開いている順</option>
@@ -534,7 +534,7 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
   function known(c){return c.bands.length&&c.purposes.length;}
 
   var DEMO_POS={lat:35.6975,lng:139.7614,label:"明治大学 駿河台キャンパス付近"};
-  var state={station:null,purpose:"",price:"any",kind:"all",pos:null,sort:"walk",mode:"cond",kw:"",feat:{}};
+  var state={station:null,purpose:"",price:"any",kind:"all",pos:null,here:null,sort:"here",mode:"cond",kw:"",feat:{}};
   var $=function(id){return document.getElementById(id);};
   var find=function(list,id){for(var i=0;i<list.length;i++)if(list[i].id===id)return list[i];return null;};
   var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});};
@@ -667,7 +667,7 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
 
   /* ---------- 現在地 ---------- */
   function applyPos(pos,isDemo){
-    state.pos=pos;
+    state.pos=pos;if(!isDemo)state.here=pos;
     var n=nearest(pos,1)[0];
     choose(n.s);
     var note=$("geoNote");note.className="geo-note ok";
@@ -701,21 +701,38 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
   $("timeSel").innerHTML=TIMES.map(function(t){return '<option value="'+t.v+'">'+t.label+'</option>';}).join("");
   $("timeSel").addEventListener("change",function(e){state.time=e.target.value?+e.target.value:null;render();});
   $("purposes").addEventListener("change",function(e){state.purpose=e.target.value;render();});
-  // 「現在地から近い順」は、選んだときに位置情報を取得する（取得できなければ駅から近い順に戻す）
+  // 並び順は「現在地から近い順」が初期値。位置情報は、結果を表示するとき（駅を選んだときなど）に取得する
   function sortNote(msg,isErr){var n=$("sortNote");n.hidden=!msg;n.textContent=msg||"";n.className="sort-note"+(isErr?" err":"");}
+  var hereAsked=false,hereWaiting=false;
+  function fallbackToWalk(msg){state.sort="walk";$("sortSel").value="walk";sortNote(msg,false);render();}
+  function requestHere(fromSelect){
+    if(!navigator.geolocation){fallbackToWalk("このブラウザでは位置情報を使えないため、駅から近い順で表示しています。");return;}
+    hereAsked=true;hereWaiting=true;sortNote("現在地を取得しています…");
+    navigator.geolocation.getCurrentPosition(function(p){
+      hereWaiting=false;state.here={lat:p.coords.latitude,lng:p.coords.longitude};state.sort="here";$("sortSel").value="here";
+      sortNote("現在地からの直線距離で並べています。");render();
+    },function(err){
+      hereWaiting=false;
+      fallbackToWalk(err.code===1?"位置情報の利用が許可されていないため、駅から近い順で表示しています。":"現在地を取得できなかったため、駅から近い順で表示しています。");
+    },{timeout:8000,maximumAge:300000});
+  }
+  // 結果を出す場面で、まだ現在地がなければ取得する（ページを開いた瞬間には許可を求めない）
+  function ensureHere(){
+    if(state.sort!=="here"||state.here||hereAsked)return;
+    var need=state.mode==="cond"?!!state.station:state.mode==="kw"?!!state.kw.trim():favCount()>0;
+    if(need)requestHere(false);
+  }
   $("sortSel").addEventListener("change",function(e){
     var v=e.target.value;
     if(v!=="here"){state.sort=v;sortNote("");render();return;}
-    if(!navigator.geolocation){e.target.value=state.sort;sortNote("このブラウザは位置情報に対応していないため、現在地から近い順にできません。",true);return;}
-    sortNote("現在地を取得しています…");
-    navigator.geolocation.getCurrentPosition(function(p){
-      state.pos={lat:p.coords.latitude,lng:p.coords.longitude};state.sort="here";
-      sortNote("現在地からの直線距離で並べています。");render();
-    },function(err){
-      $("sortSel").value=state.sort;
-      sortNote(err.code===1?"位置情報の利用が許可されていないため、並び順を変更できませんでした。":"現在地を取得できなかったため、並び順を変更できませんでした。",true);
-    },{timeout:8000,maximumAge:300000});
+    state.sort="here";
+    if(state.here){sortNote("現在地からの直線距離で並べています。");render();return;}
+    hereAsked=false;requestHere(true);
   });
+  // すでに位置情報が許可されている端末では、最初から現在地を使う
+  if(navigator.permissions&&navigator.permissions.query){
+    navigator.permissions.query({name:"geolocation"}).then(function(r){if(r.state==="granted"&&!state.here&&state.sort==="here")requestHere(false);}).catch(function(){});
+  }
 
   /* ---------- 結果 ---------- */
   function kindOk(c){return state.kind==="all"||c.type===state.kind;}
@@ -812,8 +829,8 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
   CAFES.forEach(function(c){c.close=parseClose(c.hours);c.fn=fcount(c);c.ranges=parseRanges(c.hours);});
   var showHere=false; // 今描いている一覧が現在地からの距離順かどうか
   function byHere(a,b){return hereDist(a)-hereDist(b);}
-  function hereSorting(){return state.sort==="here"&&!!state.pos;}
-  function hereDist(c){return state.pos&&c.lat!=null?dist(state.pos,{lat:c.lat,lng:c.lng}):1e9;}
+  function hereSorting(){return state.sort==="here"&&!!state.here;}
+  function hereDist(c){return state.here&&c.lat!=null?dist(state.here,{lat:c.lat,lng:c.lng}):1e9;}
   function sortFn(a,b){
     if(state.purpose==="online"&&state.sort!=="here"){var la=onlineLevel(a),lb=onlineLevel(b);if(la!==lb)return la-lb;}
     switch(state.sort){
@@ -825,6 +842,7 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
     }
   }
   function render(){
+    ensureHere();
     if(state.mode==="kw"){renderKw();return;}
     if(state.mode==="fav"){renderFav();return;}
     var out=$("results"),cond=$("resultsCond"),sortWrap=$("sortWrap");
