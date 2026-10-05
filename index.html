@@ -764,7 +764,7 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
     var lk=linkOf(c),linkHtml=lk?'<a class="ext-link" href="'+esc(lk.url)+'" target="_blank" rel="noopener noreferrer" aria-label="'+esc(c.name)+'の'+lk.label+'（新しいタブで開きます）">'+lk.label+' ↗</a>':"";
     var typeTag=c.type==="c"?'<span class="type-tag chain">'+esc(c.chain||"チェーン")+'</span>':'<span class="type-tag indep">個人店</span>';
     return '<li class="card"><div class="card-top"><div><h3>'+esc(c.name)+linkHtml+typeTag+'</h3>'+
-      '<p class="where">'+esc(c.st.label)+'駅 徒歩約'+c.walk+'分'+(state.sort==="here"&&state.pos&&c.lat!=null?'<span class="from-here">｜現在地から'+(hereDist(c)<50?'50m以内':fmtDist(hereDist(c)))+'</span>':"")+(extra||"")+'</p></div>'+priceHTML(c)+'</div>'+
+      '<p class="where">'+esc(c.st.label)+'駅 徒歩約'+c.walk+'分'+(showHere&&c.lat!=null?'<span class="from-here">｜現在地から'+(hereDist(c)<50?'50m以内':fmtDist(hereDist(c)))+'</span>':"")+(extra||"")+'</p></div>'+priceHTML(c)+'</div>'+
       (c.note?'<p class="desc">'+esc(c.note)+'</p>':"")+
       (c.hours?'<div class="facts"><span><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>'+esc(c.hours)+'</span></div>':'<div class="facts"><span>営業時間は未確認</span></div>')+
       '<div class="tags">'+tags+'</div>'+(function(){
@@ -810,9 +810,12 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
   }
   var CAFE_BY_KEY={};CAFES.forEach(function(c){c.key=(c.name+"_"+(+c.lat).toFixed(5)+"_"+(+c.lng).toFixed(5)).replace(/[^\w\u3040-\u30ff\u4e00-\u9fff]/g,"_");CAFE_BY_KEY[c.key]=c;});
   CAFES.forEach(function(c){c.close=parseClose(c.hours);c.fn=fcount(c);c.ranges=parseRanges(c.hours);});
+  var showHere=false; // 今描いている一覧が現在地からの距離順かどうか
+  function byHere(a,b){return hereDist(a)-hereDist(b);}
+  function hereSorting(){return state.sort==="here"&&!!state.pos;}
   function hereDist(c){return state.pos&&c.lat!=null?dist(state.pos,{lat:c.lat,lng:c.lng}):1e9;}
   function sortFn(a,b){
-    if(state.purpose==="online"){var la=onlineLevel(a),lb=onlineLevel(b);if(la!==lb)return la-lb;}
+    if(state.purpose==="online"&&state.sort!=="here"){var la=onlineLevel(a),lb=onlineLevel(b);if(la!==lb)return la-lb;}
     switch(state.sort){
       case "price":return pkey(a)-pkey(b)||a.walk-b.walk;
       case "feat":return b.fn-a.fn||a.walk-b.walk;
@@ -825,6 +828,7 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
     if(state.mode==="kw"){renderKw();return;}
     if(state.mode==="fav"){renderFav();return;}
     var out=$("results"),cond=$("resultsCond"),sortWrap=$("sortWrap");
+    showHere=hereSorting();
     var miss=[];
     if(!state.station)miss.push("駅");
     if(miss.length){
@@ -883,7 +887,7 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
       }).join("")+'</ul>';
     }else{
       html='<div class="state-box"><p><strong>'+esc(st.label)+'駅</strong>周辺で、条件に合うお店は見つかりませんでした。</p><p>目的を変えるか、下の近くの駅の候補を確認してください。</p></div>';
-      var alt=[];
+      var alt=[];showHere=false;
       CAFES.forEach(function(c){
         if(hereIds[c.id]||!kindOk(c)||!condOk(c))return;
         var d=(c.lat!=null)?dist(st,{lat:c.lat,lng:c.lng}):dist(st,c.st);
@@ -949,8 +953,10 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
       return;
     }
     var hits=kwSearch(q);
+    showHere=hereSorting();
+    if(showHere)hits=hits.slice().sort(byHere);
     $("resultsTitle").textContent="検索結果 "+hits.length+"件";
-    cond.textContent="キーワード「"+q+"」"+(hits.length>KW_LIMIT?"（上位"+KW_LIMIT+"件を表示）":"");
+    cond.textContent="キーワード「"+q+"」"+(showHere?"｜現在地から近い順":"")+(hits.length>KW_LIMIT?"（上位"+KW_LIMIT+"件を表示）":"");
     if(!hits.length){
       out.innerHTML='<div class="state-box"><p>「'+esc(q)+'」に当てはまるお店は見つかりませんでした。</p><p>言葉を短くするか、別の言い方で試してください。</p></div>';
       return;
@@ -1003,9 +1009,11 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
   function renderFav(){
     var out=$("results"),cond=$("resultsCond");
     $("sortWrap").hidden=true;
-    var list=CAFES.filter(isFav).sort(function(a,b){return (favs[b.key]||0)-(favs[a.key]||0);});
+    showHere=hereSorting();
+    var list=CAFES.filter(isFav).sort(showHere?byHere:function(a,b){return (favs[b.key]||0)-(favs[a.key]||0);});
     $("resultsTitle").textContent="保存したお店 "+list.length+"件";
     cond.textContent=acctUser?"ログイン中のアカウントに保存しています（ほかの端末でも表示されます）":"この端末のブラウザに保存しています";
+    if(showHere)cond.textContent+="｜現在地から近い順";
     if(!list.length){
       out.innerHTML='<div class="state-box"><p>まだ保存したお店はありません。</p><p>検索結果の「保存する」を押すと、ここに一覧で表示されます。</p></div>';
       return;
