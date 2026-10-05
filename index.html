@@ -52,6 +52,32 @@ button,input,select{font:inherit;color:inherit}
 .brand-mark .icon{width:22px;height:22px}
 .brand-name{font-size:22px;letter-spacing:.12em;line-height:1.2}
 .brand-sub{display:block;font-size:12px;font-weight:400;color:var(--text-sub);letter-spacing:.06em;font-family:"Noto Sans JP",sans-serif;margin-top:2px}
+.header-right{display:flex;align-items:center;gap:10px}
+.account-btn{font:inherit;font-size:13px;font-weight:700;min-height:36px;padding:4px 14px;border:1px solid var(--line-strong);border-radius:999px;background:var(--surface);color:var(--primary);cursor:pointer;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.account-btn:hover{border-color:var(--primary)}
+.account-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+dialog.acct{border:0;padding:0;border-radius:16px;background:var(--surface);color:var(--text);width:min(440px,calc(100vw - 32px));box-shadow:var(--shadow)}
+dialog.acct::backdrop{background:rgba(46,38,34,.45)}
+.acct-in{padding:22px 22px 24px}
+.acct-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.acct-head h2{margin:0;font-size:18px}
+.acct-x{font:inherit;font-size:20px;line-height:1;width:40px;height:40px;border:0;border-radius:8px;background:transparent;color:var(--text-sub);cursor:pointer}
+.acct-x:focus-visible{outline:2px solid var(--primary)}
+.acct-lead{font-size:14px;color:var(--text-sub);margin:0 0 16px;line-height:1.7}
+.acct label{display:block;font-size:14px;font-weight:700;margin:14px 0 6px}
+.acct input[type=email],.acct input[type=password],.acct input[type=text]{width:100%;min-height:48px;padding:10px 14px;border:1px solid var(--line-strong);border-radius:10px;background:var(--bg);color:var(--text);font:inherit;font-size:16px;box-sizing:border-box}
+.acct input:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.acct .show-pw{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:400;margin:8px 0 0;color:var(--text-sub)}
+.acct-submit{font:inherit;font-size:15px;font-weight:700;width:100%;min-height:48px;margin-top:20px;border:1px solid var(--primary);border-radius:10px;background:var(--primary);color:var(--bg);cursor:pointer}
+.acct-submit:disabled{opacity:.6;cursor:default}
+.acct-sub{font:inherit;font-size:14px;font-weight:700;width:100%;min-height:44px;margin-top:10px;border:1px solid var(--line-strong);border-radius:10px;background:transparent;color:var(--text);cursor:pointer}
+.acct-danger{color:var(--warn);border-color:var(--warn)}
+.acct-msg{font-size:13px;margin:12px 0 0;line-height:1.6}
+.acct-msg.err{color:var(--warn)}
+.acct-msg.ok{color:var(--success)}
+.acct-links{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:16px}
+.acct-note{font-size:12px;color:var(--text-sub);margin:14px 0 0;line-height:1.6}
+.acct-me{font-size:14px;margin:0 0 4px;word-break:break-all}
 .demo-flag{font-size:11px;color:var(--text-sub);border:1px solid var(--line-strong);border-radius:999px;padding:1px 10px;white-space:nowrap;letter-spacing:.1em}
 
 /* layout */
@@ -199,6 +225,9 @@ legend.field-label + *{clear:both}
 .call-note{font-size:12px;color:var(--text-sub);margin:8px 0 0;line-height:1.6}
 .more-branch{font-size:12px;color:var(--text-sub);margin:10px 0 0;padding-top:8px;border-top:1px dashed var(--line)}
 .walk-note{font-size:12px;color:var(--text-sub);margin:8px 0 0}
+.sort-note{font-size:12px;color:var(--text-sub);margin:-4px 0 12px;text-align:right}
+.sort-note.err{color:var(--warn)}
+.from-here{color:var(--primary);font-weight:500}
 details.more{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 16px}
 details.more summary{color:var(--text);font-size:15px}
 details.more p{font-size:13px;color:var(--text-sub);margin:8px 0}
@@ -303,9 +332,18 @@ summary{cursor:pointer;font-weight:700;color:var(--primary);font-size:14px}
       <span class="brand-mark"><svg class="icon"><use href="#i-cup"/></svg></span>
       <span class="brand-name">カフェナビ<span class="brand-sub">駅と目的で、ちょうどいい一杯を。</span></span>
     </a>
-    <span class="demo-flag">β版</span>
+    <div class="header-right">
+      <button type="button" class="account-btn" id="accountBtn" aria-haspopup="dialog" hidden>ログイン</button>
+      <span class="demo-flag">β版</span>
+    </div>
   </div>
 </header>
+<dialog class="acct" id="acctDlg" aria-labelledby="acctTitle">
+  <div class="acct-in">
+    <div class="acct-head"><h2 id="acctTitle">ログイン</h2><button type="button" class="acct-x" id="acctClose" aria-label="閉じる">×</button></div>
+    <div id="acctBody"></div>
+  </div>
+</dialog>
 
 <div class="layout">
   <section class="search-panel" aria-labelledby="panelTitle">
@@ -326,7 +364,7 @@ summary{cursor:pointer;font-weight:700;color:var(--primary);font-size:14px}
     </div>
 
     <div id="favPanel" role="tabpanel" aria-labelledby="tabFav" hidden>
-      <p class="hint" style="margin-top:0">保存したお店は、このブラウザだけに記録されます。別の端末やブラウザでは表示されません。</p>
+      <p class="hint" id="favHint" style="margin-top:0">保存したお店は、このブラウザだけに記録されます。ログインすると、ほかの端末でも同じ一覧を見られます。</p>
     </div>
 
     <div id="condPanel" role="tabpanel" aria-labelledby="tabCond">
@@ -387,6 +425,7 @@ summary{cursor:pointer;font-weight:700;color:var(--primary);font-size:14px}
       <label class="sort" id="sortWrap" hidden>並び順
         <select id="sortSel">
           <option value="walk">駅から近い順</option>
+          <option value="here">現在地から近い順</option>
           <option value="price">価格が安い順</option>
           <option value="feat">設備が充実している順</option>
           <option value="late">遅くまで開いている順</option>
@@ -394,6 +433,7 @@ summary{cursor:pointer;font-weight:700;color:var(--primary);font-size:14px}
         </select>
       </label>
     </div>
+    <p class="sort-note" id="sortNote" role="status" hidden></p>
     <div id="results" aria-live="polite"><div class="state-box"><p>店舗データを読み込んでいます…</p></div></div>
   </section>
 
@@ -436,18 +476,22 @@ summary{cursor:pointer;font-weight:700;color:var(--primary);font-size:14px}
 var DATA_FILES={stations:"stations.json",cafes:"cafes.json"};
 function loadCafeNavi(){
   var opt={cache:"no-cache"};
-  Promise.all([
-    fetch(DATA_FILES.stations,opt).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}),
-    fetch(DATA_FILES.cafes,opt).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-  ]).then(function(res){
+  function get(name){
+    return fetch(name,opt).then(function(r){if(!r.ok){var e=new Error(name+" を読み込めません（"+r.status+"）");e.file=name;e.status=r.status;throw e;}return r.json();});
+  }
+  function fail(html){var el=document.getElementById("results");if(el)el.innerHTML='<div class="state-box">'+html+'</div>';}
+  Promise.all([get(DATA_FILES.stations),get(DATA_FILES.cafes)]).then(function(res){
     var cols=res[1].columns;
     var rows=res[1].cafes.map(function(c){return cols.map(function(k){return c[k];}).concat([""]);});
-    bootCafeNavi(res[0],rows,res[1].data_date);
-  }).catch(function(){
-    var el=document.getElementById("results");
-    if(el)el.innerHTML='<div class="state-box"><p>店舗データを読み込めませんでした。</p><p>通信状況を確認して、ページを再読み込みしてください。</p></div>';
+    try{bootCafeNavi(res[0],rows,res[1].data_date);}
+    catch(err){console.error(err);fail('<p>ページの準備中にエラーが発生しました。</p><p>時間をおいて再読み込みしてください。</p>');}
+  }).catch(function(err){
+    console.error(err);
+    if(err&&err.status===404)fail('<p>データファイル（'+err.file+'）が見つかりません。</p><p>サイトの更新作業中の可能性があります。時間をおいて再読み込みしてください。</p>');
+    else fail('<p>店舗データを読み込めませんでした。</p><p>通信状況を確認して、ページを再読み込みしてください。</p>');
   });
 }
+
 function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
   var PREFS=["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
   var ST = STATIONS_RAW.map(function(r,i){return {i:i,label:r[0],kana:r[1],pref:r[2],lat:r[3],lng:r[4],lines:r[5],n:r[6],area:r[7]||""};});
@@ -657,7 +701,21 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
   $("timeSel").innerHTML=TIMES.map(function(t){return '<option value="'+t.v+'">'+t.label+'</option>';}).join("");
   $("timeSel").addEventListener("change",function(e){state.time=e.target.value?+e.target.value:null;render();});
   $("purposes").addEventListener("change",function(e){state.purpose=e.target.value;render();});
-  $("sortSel").addEventListener("change",function(e){state.sort=e.target.value;render();});
+  // 「現在地から近い順」は、選んだときに位置情報を取得する（取得できなければ駅から近い順に戻す）
+  function sortNote(msg,isErr){var n=$("sortNote");n.hidden=!msg;n.textContent=msg||"";n.className="sort-note"+(isErr?" err":"");}
+  $("sortSel").addEventListener("change",function(e){
+    var v=e.target.value;
+    if(v!=="here"){state.sort=v;sortNote("");render();return;}
+    if(!navigator.geolocation){e.target.value=state.sort;sortNote("このブラウザは位置情報に対応していないため、現在地から近い順にできません。",true);return;}
+    sortNote("現在地を取得しています…");
+    navigator.geolocation.getCurrentPosition(function(p){
+      state.pos={lat:p.coords.latitude,lng:p.coords.longitude};state.sort="here";
+      sortNote("現在地からの直線距離で並べています。");render();
+    },function(err){
+      $("sortSel").value=state.sort;
+      sortNote(err.code===1?"位置情報の利用が許可されていないため、並び順を変更できませんでした。":"現在地を取得できなかったため、並び順を変更できませんでした。",true);
+    },{timeout:8000,maximumAge:300000});
+  });
 
   /* ---------- 結果 ---------- */
   function kindOk(c){return state.kind==="all"||c.type===state.kind;}
@@ -706,7 +764,7 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
     var lk=linkOf(c),linkHtml=lk?'<a class="ext-link" href="'+esc(lk.url)+'" target="_blank" rel="noopener noreferrer" aria-label="'+esc(c.name)+'の'+lk.label+'（新しいタブで開きます）">'+lk.label+' ↗</a>':"";
     var typeTag=c.type==="c"?'<span class="type-tag chain">'+esc(c.chain||"チェーン")+'</span>':'<span class="type-tag indep">個人店</span>';
     return '<li class="card"><div class="card-top"><div><h3>'+esc(c.name)+linkHtml+typeTag+'</h3>'+
-      '<p class="where">'+esc(c.st.label)+'駅 徒歩約'+c.walk+'分'+(extra||"")+'</p></div>'+priceHTML(c)+'</div>'+
+      '<p class="where">'+esc(c.st.label)+'駅 徒歩約'+c.walk+'分'+(state.sort==="here"&&state.pos&&c.lat!=null?'<span class="from-here">｜現在地から'+(hereDist(c)<50?'50m以内':fmtDist(hereDist(c)))+'</span>':"")+(extra||"")+'</p></div>'+priceHTML(c)+'</div>'+
       (c.note?'<p class="desc">'+esc(c.note)+'</p>':"")+
       (c.hours?'<div class="facts"><span><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg>'+esc(c.hours)+'</span></div>':'<div class="facts"><span>営業時間は未確認</span></div>')+
       '<div class="tags">'+tags+'</div>'+(function(){
@@ -752,12 +810,14 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
   }
   var CAFE_BY_KEY={};CAFES.forEach(function(c){c.key=(c.name+"_"+(+c.lat).toFixed(5)+"_"+(+c.lng).toFixed(5)).replace(/[^\w\u3040-\u30ff\u4e00-\u9fff]/g,"_");CAFE_BY_KEY[c.key]=c;});
   CAFES.forEach(function(c){c.close=parseClose(c.hours);c.fn=fcount(c);c.ranges=parseRanges(c.hours);});
+  function hereDist(c){return state.pos&&c.lat!=null?dist(state.pos,{lat:c.lat,lng:c.lng}):1e9;}
   function sortFn(a,b){
     if(state.purpose==="online"){var la=onlineLevel(a),lb=onlineLevel(b);if(la!==lb)return la-lb;}
     switch(state.sort){
       case "price":return pkey(a)-pkey(b)||a.walk-b.walk;
       case "feat":return b.fn-a.fn||a.walk-b.walk;
       case "late":return b.close-a.close||a.walk-b.walk;
+      case "here":return hereDist(a)-hereDist(b)||a.walk-b.walk;
       default:return a.walk-b.walk||pkey(a)-pkey(b);
     }
   }
@@ -936,7 +996,7 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
   var FAV_KEY="cafenavi-favorites-v1";
   var favs={};
   try{favs=JSON.parse(localStorage.getItem(FAV_KEY)||"{}")||{};}catch(e){favs={};}
-  function saveFavs(){try{localStorage.setItem(FAV_KEY,JSON.stringify(favs));}catch(e){}}
+  function saveFavs(){try{localStorage.setItem(FAV_KEY,JSON.stringify(favs));}catch(e){}cloudSave();}
   function isFav(c){return !!favs[c.key];}
   function favCount(){return CAFES.filter(isFav).length;}
   function updateFavTab(){var n=favCount();$("tabFav").textContent="保存（"+n+"）";}
@@ -945,7 +1005,7 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
     $("sortWrap").hidden=true;
     var list=CAFES.filter(isFav).sort(function(a,b){return (favs[b.key]||0)-(favs[a.key]||0);});
     $("resultsTitle").textContent="保存したお店 "+list.length+"件";
-    cond.textContent="この端末のブラウザに保存しています";
+    cond.textContent=acctUser?"ログイン中のアカウントに保存しています（ほかの端末でも表示されます）":"この端末のブラウザに保存しています";
     if(!list.length){
       out.innerHTML='<div class="state-box"><p>まだ保存したお店はありません。</p><p>検索結果の「保存する」を押すと、ここに一覧で表示されます。</p></div>';
       return;
@@ -954,6 +1014,169 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
     out.innerHTML='<ul class="cards">'+list.map(function(c){return card(c);}).join("")+'</ul>';
     state.purpose=savedP;
   }
+
+
+  // ---- ログイン（メールアドレスとパスワード）と、保存したお店の同期 ----
+  // Firebase で作成した設定を貼り付けると、ログイン機能が有効になります（README参照）。空のままなら、今までどおり端末内だけに保存します。
+  var FIREBASE_CONFIG=null;
+  var FIREBASE_VER="12.19.0";
+  var acctUser=null,acctDb=null,acctAuth=null,acctView="login",acctJustSignedIn=false,acctSaveTimer=null,acctAfterReauth=null;
+  function loadScript(src){return new Promise(function(res,rej){var s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+  function loadFirebase(){
+    var bases=["https://www.gstatic.com/firebasejs/"+FIREBASE_VER+"/","https://cdn.jsdelivr.net/npm/firebase@"+FIREBASE_VER+"/"];
+    function from(i){
+      var b=bases[i];
+      return loadScript(b+"firebase-app-compat.js").then(function(){return Promise.all([loadScript(b+"firebase-auth-compat.js"),loadScript(b+"firebase-firestore-compat.js")]);})
+        .catch(function(e){if(i+1<bases.length)return from(i+1);throw e;});
+    }
+    return from(0);
+  }
+  var AUTH_ERRORS={
+    "auth/invalid-email":"メールアドレスの形式が正しくありません。",
+    "auth/invalid-credential":"メールアドレスかパスワードが違います。",
+    "auth/wrong-password":"メールアドレスかパスワードが違います。",
+    "auth/user-not-found":"メールアドレスかパスワードが違います。",
+    "auth/missing-password":"パスワードを入力してください。",
+    "auth/email-already-in-use":"このメールアドレスはすでに登録されています。「ログイン」からお進みください。",
+    "auth/weak-password":"パスワードは8文字以上にしてください。",
+    "auth/too-many-requests":"試行回数が多すぎます。しばらく時間をおいてからお試しください。",
+    "auth/network-request-failed":"通信できませんでした。電波の状態を確認してください。",
+    "auth/user-disabled":"このアカウントは利用できません。"
+  };
+  function authMsg(e){return AUTH_ERRORS[e&&e.code]||"うまくいきませんでした。時間をおいてもう一度お試しください。"+(e&&e.code?"（"+e.code+"）":"");}
+  function maskEmail(m){if(!m)return "";var a=m.split("@");return (a[0].length<=2?a[0][0]+"*":a[0].slice(0,2)+"***")+"@"+a[1];}
+
+  function acctRender(){
+    var b=$("acctBody"),title=$("acctTitle"),h="";
+    var pw=function(id,ac){return '<input type="password" id="'+id+'" autocomplete="'+ac+'" required minlength="8"><label class="show-pw"><input type="checkbox" data-pw="'+id+'">パスワードを表示する</label>';};
+    if(acctView==="account"&&acctUser){
+      title.textContent="アカウント";
+      h='<p class="acct-me">ログイン中：<strong>'+esc(acctUser.email||"")+'</strong></p>'+
+        '<p class="acct-lead">保存したお店は、このアカウントに記録されています。ほかの端末でも、同じメールアドレスでログインすると表示されます。</p>'+
+        '<button type="button" class="acct-sub" id="acctLogout">ログアウト</button>'+
+        '<button type="button" class="acct-sub acct-danger" id="acctDelete">アカウントを削除する</button>'+
+        '<p class="acct-msg" id="acctMsg" role="alert"></p>'+
+        '<p class="acct-note">ログアウトすると、この端末に表示していた保存一覧も消去します（アカウントには残ります）。アカウントを削除すると、メールアドレスと保存一覧はすべて消え、元に戻せません。</p>';
+    }else if(acctView==="reauth"){
+      title.textContent="パスワードの確認";
+      h='<p class="acct-lead">安全のため、もう一度パスワードを入力してください。</p><form id="acctForm" novalidate><label for="acctPw">パスワード</label>'+pw("acctPw","current-password")+
+        '<button type="submit" class="acct-submit">確認して続ける</button><p class="acct-msg" id="acctMsg" role="alert"></p></form>';
+    }else if(acctView==="reset"){
+      title.textContent="パスワードの再設定";
+      h='<p class="acct-lead">登録したメールアドレスに、パスワードを再設定するためのメールを送ります。</p><form id="acctForm" novalidate>'+
+        '<label for="acctEmail">メールアドレス</label><input type="email" id="acctEmail" autocomplete="email" inputmode="email" required>'+
+        '<button type="submit" class="acct-submit">再設定メールを送る</button><p class="acct-msg" id="acctMsg" role="alert"></p></form>'+
+        '<div class="acct-links"><button type="button" class="link-btn" data-view="login">ログインに戻る</button></div>';
+    }else{
+      var su=acctView==="signup";
+      title.textContent=su?"新規登録":"ログイン";
+      h='<p class="acct-lead">'+(su?"メールアドレスとパスワードを登録すると、保存したお店をほかの端末でも見られるようになります。":"ログインすると、保存したお店をほかの端末でも見られます。")+'</p>'+
+        '<form id="acctForm" novalidate><label for="acctEmail">メールアドレス</label><input type="email" id="acctEmail" autocomplete="email" inputmode="email" required>'+
+        '<label for="acctPw">パスワード'+(su?'（8文字以上）':'')+'</label>'+pw("acctPw",su?"new-password":"current-password")+
+        '<button type="submit" class="acct-submit">'+(su?"登録する":"ログインする")+'</button><p class="acct-msg" id="acctMsg" role="alert"></p></form>'+
+        '<div class="acct-links">'+(su?'<button type="button" class="link-btn" data-view="login">登録済みの方はこちら</button>':'<button type="button" class="link-btn" data-view="signup">新規登録はこちら</button><button type="button" class="link-btn" data-view="reset">パスワードを忘れた方</button>')+'</div>'+
+        (su?'<p class="acct-note">登録すると、<a href="terms.html#account" target="_blank" rel="noopener">利用規約</a>の「アカウントと個人情報の取り扱い」に同意したものとみなします。いま保存しているお店は、登録したアカウントに引き継がれます。</p>':'');
+    }
+    b.innerHTML=h;
+    var f=b.querySelector("input");if(f)setTimeout(function(){f.focus();},0);
+  }
+  function acctMsg(text,kind){var m=$("acctMsg");if(m){m.textContent=text;m.className="acct-msg"+(kind?" "+kind:"");}}
+  function acctBusy(on){var s=$("acctBody").querySelector(".acct-submit");if(s)s.disabled=on;}
+  function acctOpen(){acctView=acctUser?"account":"login";acctRender();var d=$("acctDlg");if(d.showModal)d.showModal();else d.setAttribute("open","");}
+  function acctClose(){var d=$("acctDlg");if(d.close)d.close();else d.removeAttribute("open");$("accountBtn").focus();}
+  function updateAcctUI(){
+    var btn=$("accountBtn");
+    btn.textContent=acctUser?maskEmail(acctUser.email):"ログイン";
+    btn.setAttribute("aria-label",acctUser?"アカウント（ログイン中："+(acctUser.email||"")+"）":"ログイン");
+    $("favHint").textContent=acctUser?"保存したお店は、ログイン中のアカウントに記録されます。ほかの端末でも同じ一覧を見られます。":"保存したお店は、このブラウザだけに記録されます。ログインすると、ほかの端末でも同じ一覧を見られます。";
+    if(state.mode==="fav")renderFav();
+  }
+  function favDoc(){return acctDb.collection("users").doc(acctUser.uid);}
+  function cloudSave(){
+    if(!acctUser||!acctDb)return;
+    clearTimeout(acctSaveTimer);
+    acctSaveTimer=setTimeout(function(){
+      favDoc().set({favs:favs,updatedAt:firebase.firestore.FieldValue.serverTimestamp()}).catch(function(){});
+    },600);
+  }
+  function applyFavs(next){
+    favs=next;try{localStorage.setItem(FAV_KEY,JSON.stringify(favs));}catch(e){}
+    updateFavTab();if(state.mode==="fav")renderFav();else render();
+  }
+  function onAcct(u){
+    acctUser=u;updateAcctUI();
+    if(!u)return;
+    favDoc().get().then(function(doc){
+      var cloud=(doc.exists&&doc.data().favs)||{},next={},k;
+      if(acctJustSignedIn){
+        // ログインした直後だけ、端末の保存とアカウントの保存を合わせる
+        for(k in cloud)next[k]=cloud[k];
+        for(k in favs)if(!next[k]||favs[k]>next[k])next[k]=favs[k];
+      }else{
+        // すでにログイン済みでページを開いたときは、アカウント側を正とする（ほかの端末で消した店を戻さないため）
+        for(k in cloud)next[k]=cloud[k];
+      }
+      acctJustSignedIn=false;applyFavs(next);cloudSave();
+    }).catch(function(){});
+  }
+  function acctSubmit(){
+    var em=$("acctEmail"),pw=$("acctPw"),email=em?em.value.trim():"",pass=pw?pw.value:"";
+    if(em&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){acctMsg("メールアドレスの形式が正しくありません。","err");em.focus();return;}
+    if(acctView==="signup"&&pass.length<8){acctMsg("パスワードは8文字以上にしてください。","err");pw.focus();return;}
+    if(pw&&!pass){acctMsg("パスワードを入力してください。","err");pw.focus();return;}
+    acctBusy(true);acctMsg("処理しています…");
+    var done=function(){acctBusy(false);};
+    if(acctView==="login"){
+      acctJustSignedIn=true;
+      acctAuth.signInWithEmailAndPassword(email,pass).then(function(){acctClose();}).catch(function(e){acctJustSignedIn=false;acctMsg(authMsg(e),"err");done();});
+    }else if(acctView==="signup"){
+      acctJustSignedIn=true;
+      acctAuth.createUserWithEmailAndPassword(email,pass).then(function(c){
+        if(c.user&&c.user.sendEmailVerification)c.user.sendEmailVerification().catch(function(){});
+        acctView="account";acctRender();acctMsg("登録しました。確認用のメールを送ったので、届いたメールのリンクを開いてください。","ok");
+      }).catch(function(e){acctJustSignedIn=false;acctMsg(authMsg(e),"err");done();});
+    }else if(acctView==="reset"){
+      acctAuth.sendPasswordResetEmail(email).then(function(){acctMsg("このメールアドレスが登録されていれば、再設定用のメールが届きます。迷惑メールのフォルダも確認してください。","ok");done();})
+        .catch(function(e){acctMsg(authMsg(e),"err");done();});
+    }else if(acctView==="reauth"){
+      var cred=firebase.auth.EmailAuthProvider.credential(acctUser.email,pass);
+      acctUser.reauthenticateWithCredential(cred).then(function(){var f=acctAfterReauth;acctAfterReauth=null;acctView="account";acctRender();if(f)f();})
+        .catch(function(e){acctMsg(authMsg(e),"err");done();});
+    }
+  }
+  function acctDelete(){
+    if(!confirm("アカウントを削除すると、登録したメールアドレスと保存したお店がすべて消え、元に戻せません。削除しますか？"))return;
+    acctMsg("削除しています…");
+    var u=acctUser;
+    favDoc().delete().then(function(){return u.delete();}).then(function(){
+      applyFavs({});acctClose();
+    }).catch(function(e){
+      if(e&&e.code==="auth/requires-recent-login"){acctAfterReauth=acctDelete;acctView="reauth";acctRender();}
+      else acctMsg(authMsg(e),"err");
+    });
+  }
+  function initAccount(){
+    if(!FIREBASE_CONFIG)return;
+    var btn=$("accountBtn");btn.hidden=false;btn.disabled=true;
+    loadFirebase().then(function(){
+      firebase.initializeApp(FIREBASE_CONFIG);
+      acctAuth=firebase.auth();acctDb=firebase.firestore();
+      acctAuth.languageCode="ja";
+      acctAuth.onAuthStateChanged(onAcct);
+      btn.disabled=false;
+    }).catch(function(){btn.hidden=true;});
+    btn.addEventListener("click",acctOpen);
+    $("acctClose").addEventListener("click",acctClose);
+    $("acctDlg").addEventListener("click",function(e){if(e.target===this)acctClose();});
+    $("acctBody").addEventListener("submit",function(e){e.preventDefault();acctSubmit();});
+    $("acctBody").addEventListener("click",function(e){
+      var v=e.target.closest("[data-view]");if(v){acctView=v.dataset.view;acctRender();return;}
+      if(e.target.id==="acctLogout"){acctAuth.signOut().then(function(){applyFavs({});acctClose();});return;}
+      if(e.target.id==="acctDelete"){acctDelete();return;}
+    });
+    $("acctBody").addEventListener("change",function(e){var id=e.target.dataset&&e.target.dataset.pw;if(id){$(id).type=e.target.checked?"text":"password";}});
+  }
+  initAccount();
 
   // ---- 閉店・情報の誤りの報告（共有データベースに保存） ----
   // 報告フォームの設定。Googleフォームを作成したら、下の4つを書き換えてください（README参照）
