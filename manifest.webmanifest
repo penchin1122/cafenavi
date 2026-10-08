@@ -1,0 +1,18 @@
+{
+  "name": "カフェナビ｜駅と目的で探すカフェ検索",
+  "short_name": "カフェナビ",
+  "description": "駅と目的（作業・会話・休憩など）からカフェを探せる検索サイト（β版）。",
+  "lang": "ja",
+  "id": "./",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F1E8DC",
+  "theme_color": "#F1E8DC",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

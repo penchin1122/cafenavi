@@ -106,3 +106,13 @@ var FIREBASE_CONFIG={
 
 - 店舗データ：© OpenStreetMap contributors（ODbL）
 - 駅データ：TrainLCD StationAPI の公開データを加工
+
+## アプリとして使う（PWA）
+
+ホーム画面に追加すると、アドレスバーのない画面でアプリのように使えます。一度開いた店舗データは端末に保存され、電波が弱い場所でも検索できます。
+
+- `manifest.webmanifest` … アプリ名・アイコン・色の設定
+- `sw.js` … オフライン用の保存（service worker）。画面とデータは通信を優先し、つながらないときだけ保存済みのものを使います
+- `icon-192.png`・`icon-512.png`・`icon-maskable-512.png`・`apple-touch-icon.png`・`favicon-32.png` … アイコン
+
+`cafes.json` や `index.html` を更新しても、利用者の端末には次に開いたときに新しいものが届きます（`sw.js` の変更は不要）。`sw.js` 自体を書き換えたときだけ、中の `VERSION` を上げてください。

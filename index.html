@@ -8,6 +8,14 @@
 <meta property="og:title" content="カフェナビ｜駅と目的で探すカフェ検索">
 <meta property="og:description" content="駅と目的からカフェを探せる検索サイト（β版）。">
 <meta property="og:type" content="website">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#F1E8DC">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="カフェナビ">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
@@ -294,6 +302,19 @@ summary{cursor:pointer;font-weight:700;color:var(--primary);font-size:14px}
 .log .k-add{background:var(--success-weak);color:var(--success)}
 .log .k-mod{background:var(--primary-weak);color:var(--primary)}
 .log .k-hold{background:var(--warn-weak);color:var(--warn)}
+.app-hint{max-width:1120px;margin:12px auto 0;padding:0 20px}
+.app-hint-in{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 10px 10px 14px}
+.app-hint-icon{width:36px;height:36px;border-radius:9px;flex:none}
+.app-hint-text{flex:1;min-width:0;font-size:13px;line-height:1.6;color:var(--text)}
+.app-hint-add{font:inherit;font-size:13px;font-weight:700;min-height:40px;padding:4px 14px;border:0;border-radius:999px;background:var(--primary);color:var(--on-primary);cursor:pointer;white-space:nowrap}
+.app-hint-add:hover{background:var(--primary-hover)}
+.app-hint-add:focus-visible,.app-hint-x:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.app-hint-x{font:inherit;font-size:18px;line-height:1;width:40px;height:40px;flex:none;border:0;border-radius:8px;background:transparent;color:var(--text-sub);cursor:pointer}
+.install-steps{margin:8px 0 0;padding-left:1.4em;font-size:14px;line-height:1.9}
+.install-steps li{margin:4px 0}
+.install-note{font-size:13px;color:var(--text-sub);margin:14px 0 0;line-height:1.7}
+.offline-note{max-width:1120px;margin:12px auto 0;padding:0 20px}
+.offline-note p{margin:0;background:var(--warn-weak);color:var(--warn);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700}
 .site-footer{border-top:1px solid var(--line);background:var(--bg);font-size:12px;color:var(--text-sub)}
 .site-footer a{color:var(--primary);text-underline-offset:3px}
 .site-footer a:focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:2px}
@@ -342,6 +363,21 @@ summary{cursor:pointer;font-weight:700;color:var(--primary);font-size:14px}
   <div class="acct-in">
     <div class="acct-head"><h2 id="acctTitle">ログイン</h2><button type="button" class="acct-x" id="acctClose" aria-label="閉じる">×</button></div>
     <div id="acctBody"></div>
+  </div>
+</dialog>
+<div class="app-hint" id="appHint" hidden>
+  <div class="app-hint-in">
+    <img class="app-hint-icon" src="icon-192.png" alt="" width="36" height="36">
+    <p class="app-hint-text" style="margin:0">ホーム画面に追加して、アプリのように使えます。</p>
+    <button type="button" class="app-hint-add" id="appHintAdd">追加する</button>
+    <button type="button" class="app-hint-x" id="appHintClose" aria-label="この案内を閉じる">×</button>
+  </div>
+</div>
+<div class="offline-note" id="offlineNote" hidden><p>オフラインです。前回保存したデータで表示しています。</p></div>
+<dialog class="acct" id="installDlg" aria-labelledby="installTitle">
+  <div class="acct-in">
+    <div class="acct-head"><h2 id="installTitle">ホーム画面に追加する</h2><button type="button" class="acct-x" id="installClose" aria-label="閉じる">×</button></div>
+    <div id="installBody"></div>
   </div>
 </dialog>
 
@@ -468,7 +504,7 @@ summary{cursor:pointer;font-weight:700;color:var(--primary);font-size:14px}
     カフェナビ（β版）。掲載情報の正確さは保証できません。お出かけ前に各店の公式情報をご確認ください。<br>
     店舗データ：© OpenStreetMap contributors（<a href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener noreferrer">ODbL</a>）。当サイトで加工したデータベースも同じ ODbL で<a href="cafes.json" download>ダウンロード</a>できます。<br>
     駅データ：TrainLCD StationAPI の公開データを加工して利用しています。価格で「推定」と表示したものは未確認です。<br>
-    <a href="terms.html">利用規約・免責事項</a>
+    <a href="terms.html">利用規約・免責事項</a><span id="installFooter" hidden>　｜　<button type="button" class="link-btn" id="installFooterBtn" style="font-size:12px">ホーム画面に追加する</button></span>
   </div>
 </footer>
 
@@ -1250,6 +1286,60 @@ function bootCafeNavi(STATIONS_RAW,DATA,dataDate){
   render();
 }
 loadCafeNavi();
+</script>
+<script>
+/* アプリとして使う（PWA）：オフライン用の保存と、ホーム画面への追加案内 */
+(function(){
+  var HINT_KEY="cafenavi_app_hint_closed";
+  var standalone=(window.matchMedia&&window.matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true;
+  var ua=navigator.userAgent||"";
+  var isIOS=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  var isMobile=isIOS||/Android|Mobile/.test(ua);
+  var isIOSSafari=isIOS&&!/CriOS|FxiOS|EdgiOS|OPiOS|Line\//.test(ua);
+  var deferred=null;
+  var hint=document.getElementById("appHint"),footer=document.getElementById("installFooter");
+  var dlg=document.getElementById("installDlg"),body=document.getElementById("installBody");
+
+  if("serviceWorker" in navigator){
+    window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(e){console.warn(e);});});
+  }
+
+  var off=document.getElementById("offlineNote");
+  function net(){off.hidden=navigator.onLine!==false;}
+  window.addEventListener("online",net);window.addEventListener("offline",net);net();
+
+  if(standalone)return;
+  footer.hidden=false;
+  var closed=false;try{closed=localStorage.getItem(HINT_KEY)==="1";}catch(e){}
+  if(isMobile&&!closed)hint.hidden=false;
+
+  window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();deferred=e;});
+  window.addEventListener("appinstalled",function(){hint.hidden=true;footer.hidden=true;deferred=null;});
+
+  function showSteps(){
+    var h;
+    if(isIOS&&isIOSSafari){
+      h='<ol class="install-steps"><li>画面下（iPadは右上）の<strong>共有ボタン</strong>（四角から矢印が出たマーク）を押します。</li><li>メニューを下にずらし、<strong>「ホーム画面に追加」</strong>を選びます。</li><li>右上の<strong>「追加」</strong>を押すと、ホーム画面にカフェナビのアイコンができます。</li></ol>';
+    }else if(isIOS){
+      h='<p class="acct-lead">iPhone・iPad では、<strong>Safari</strong> でこのページを開いてから追加してください。</p><ol class="install-steps"><li>このページのURLをコピーし、Safari で開きます。</li><li>共有ボタンから<strong>「ホーム画面に追加」</strong>を選びます。</li></ol>';
+    }else{
+      h='<ol class="install-steps"><li>ブラウザのメニュー（右上の「︙」など）を開きます。</li><li><strong>「ホーム画面に追加」</strong>または<strong>「アプリをインストール」</strong>を選びます。</li></ol>';
+    }
+    body.innerHTML=h+'<p class="install-note">追加したアイコンから開くと、アドレスバーのない画面で表示されます。一度開いた店舗データは端末に保存されるので、電波が弱い場所でも検索できます。</p>';
+    if(dlg.showModal)dlg.showModal();else dlg.setAttribute("open","");
+  }
+  function add(){
+    if(deferred){
+      var d=deferred;deferred=null;d.prompt();
+      d.userChoice.then(function(r){if(r&&r.outcome==="accepted"){hint.hidden=true;footer.hidden=true;}}).catch(function(){});
+    }else showSteps();
+  }
+  document.getElementById("appHintAdd").addEventListener("click",add);
+  document.getElementById("installFooterBtn").addEventListener("click",add);
+  document.getElementById("appHintClose").addEventListener("click",function(){hint.hidden=true;try{localStorage.setItem(HINT_KEY,"1");}catch(e){}});
+  document.getElementById("installClose").addEventListener("click",function(){dlg.close?dlg.close():dlg.removeAttribute("open");});
+  dlg.addEventListener("click",function(e){if(e.target===dlg&&dlg.close)dlg.close();});
+})();
 </script>
 </body>
 </html>
